@@ -8,6 +8,15 @@
       "is_compromised": false,
       "breach_count": 0,
       "checked_at": "2026-05-06T04:13:38.310236+00:00"
+    },
+    {
+      "id": "fca24eb2-4f10-491b-888f-384b489a3c9c",
+      "user_id": "dc6eb328-4e72-48d8-b6a7-e9ebc69e07da",
+      "upi_hash": "53b5ac53668c9bcf65bc04547df7a37737606281a54ddbb43b9b605e0b91c615",
+      "upi_masked": "a*********l@okaxis",
+      "is_compromised": true,
+      "breach_count": 1,
+      "checked_at": "2026-05-06T13:15:37.617757+00:00"
     }
   ]
 }

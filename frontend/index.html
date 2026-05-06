@@ -75,29 +75,6 @@
     </div>
   </div>
 
-  <!-- ── OTP Modal ───────────────────────────────────────────────── -->
-  <div id="otp-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="otp-modal-title" hidden>
-    <div class="modal-card glass-card otp-card">
-      <div class="otp-icon" aria-hidden="true">🔐</div>
-      <h2 id="otp-modal-title" class="modal-title">Verify Your Email</h2>
-      <p class="otp-desc">A 6-digit code has been sent. Check your server terminal (dev mode) or the API response.</p>
-      <div id="otp-dev-hint" class="otp-dev-hint" hidden></div>
-      <form id="otp-form" novalidate>
-        <div class="otp-inputs" aria-label="Enter 6-digit OTP">
-          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 1" id="otp-0" />
-          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 2" id="otp-1" />
-          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 3" id="otp-2" />
-          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 4" id="otp-3" />
-          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 5" id="otp-4" />
-          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 6" id="otp-5" />
-        </div>
-        <p id="otp-error" class="form-error" role="alert" aria-live="polite"></p>
-        <button type="submit" id="otp-verify-btn" class="modal-submit-btn">Verify</button>
-      </form>
-      <button class="link-btn otp-resend" id="otp-resend-btn">Resend OTP</button>
-    </div>
-  </div>
-
   <!-- Header -->
   <header class="site-header">
     <div class="header-inner">

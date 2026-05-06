@@ -56,19 +56,12 @@ def create_user(email: str, hashed_password: str, consent_given: bool) -> dict:
         "hashed_password": hashed_password,
         "consent_given":   consent_given,
         "created_at":      datetime.now(timezone.utc).isoformat(),
-        "otp_verified":    False,
+        "otp_verified":    True,
     }
     users.append(user)
     _write(_USERS_PATH, {"users": users})
     return user
 
-def mark_otp_verified(user_id: str) -> None:
-    db = _read(_USERS_PATH)
-    for u in db.get("users", []):
-        if u["id"] == user_id:
-            u["otp_verified"] = True
-            break
-    _write(_USERS_PATH, db)
 
 # ── Check History ─────────────────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 /* ─── UPIGuard Frontend JS v2 ──────────────────────────────────── */
 
-const API_BASE = '';
+const API_BASE = 'http://127.0.0.1:8001';
 
 // ── Token Storage (sessionStorage — cleared on tab close) ────────
 const TokenStore = {
@@ -157,36 +157,6 @@ tabRegister.addEventListener('click', () => switchTab('register'));
 document.getElementById('goto-register').addEventListener('click', () => switchTab('register'));
 document.getElementById('goto-login').addEventListener('click',    () => switchTab('login'));
 
-// ── OTP Modal ────────────────────────────────────────────────────
-const otpOverlay = document.getElementById('otp-overlay');
-const otpBoxes   = Array.from(document.querySelectorAll('.otp-box'));
-let _pendingOtpEmail = null;
-
-function openOtpModal(email) {
-  _pendingOtpEmail = email;
-  closeModal('auth-overlay');
-  otpBoxes.forEach(b => b.value = '');
-  document.getElementById('otp-error').textContent = '';
-  openModal('otp-overlay');
-  otpBoxes[0].focus();
-}
-
-// OTP box auto-advance
-otpBoxes.forEach((box, i) => {
-  box.addEventListener('input', () => {
-    box.value = box.value.replace(/\D/, '');
-    if (box.value && i < otpBoxes.length - 1) otpBoxes[i + 1].focus();
-  });
-  box.addEventListener('keydown', e => {
-    if (e.key === 'Backspace' && !box.value && i > 0) otpBoxes[i - 1].focus();
-  });
-  box.addEventListener('paste', e => {
-    e.preventDefault();
-    const digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
-    digits.split('').forEach((d, j) => { if (otpBoxes[j]) otpBoxes[j].value = d; });
-    otpBoxes[Math.min(digits.length, 5)].focus();
-  });
-});
 
 // ── Register ─────────────────────────────────────────────────────
 const registerForm = document.getElementById('register-form');
@@ -204,18 +174,10 @@ registerForm.addEventListener('submit', async e => {
   const btn = document.getElementById('register-btn');
   btn.disabled = true; btn.textContent = 'Creating…';
   try {
-    await apiPost('/api/register', { email, password, consent_given: consent });
-    // Now request OTP
-    const otpData = await apiPost('/api/otp/request', { email });
-    // Show dev hint if OTP is in response
-    const hint = document.getElementById('otp-dev-hint');
-    if (otpData.otp_dev) {
-      hint.textContent = `🛠 Dev mode OTP: ${otpData.otp_dev}`;
-      hint.hidden = false;
-    } else {
-      hint.hidden = true;
-    }
-    openOtpModal(email);
+    const data = await apiPost('/api/register', { email, password, consent_given: consent });
+    TokenStore.set(data.access_token);
+    closeModal('auth-overlay');
+    applyAuthState(email);
   } catch (err) {
     registerError.textContent = err.message;
   } finally {
@@ -240,15 +202,6 @@ loginForm.addEventListener('submit', async e => {
     TokenStore.set(data.access_token);
     closeModal('auth-overlay');
     applyAuthState(email);
-
-    // If not OTP-verified, trigger OTP flow
-    if (!data.otp_verified) {
-      const otpData = await apiPost('/api/otp/request', { email });
-      const hint = document.getElementById('otp-dev-hint');
-      if (otpData.otp_dev) { hint.textContent = `🛠 Dev mode OTP: ${otpData.otp_dev}`; hint.hidden = false; }
-      else { hint.hidden = true; }
-      openOtpModal(email);
-    }
   } catch (err) {
     loginError.textContent = err.message;
   } finally {
@@ -256,43 +209,6 @@ loginForm.addEventListener('submit', async e => {
   }
 });
 
-// ── OTP Verify ───────────────────────────────────────────────────
-const otpForm  = document.getElementById('otp-form');
-const otpError = document.getElementById('otp-error');
-
-otpForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  otpError.textContent = '';
-  const code = otpBoxes.map(b => b.value).join('');
-  if (code.length !== 6) { otpError.textContent = 'Enter all 6 digits.'; return; }
-
-  const btn = document.getElementById('otp-verify-btn');
-  btn.disabled = true; btn.textContent = 'Verifying…';
-  try {
-    const data = await apiPost('/api/otp/verify', { email: _pendingOtpEmail, code });
-    TokenStore.set(data.access_token);
-    closeModal('otp-overlay');
-    applyAuthState(_pendingOtpEmail);
-  } catch (err) {
-    otpError.textContent = err.message;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Verify';
-  }
-});
-
-document.getElementById('otp-resend-btn').addEventListener('click', async () => {
-  if (!_pendingOtpEmail) return;
-  try {
-    const otpData = await apiPost('/api/otp/request', { email: _pendingOtpEmail });
-    const hint = document.getElementById('otp-dev-hint');
-    if (otpData.otp_dev) { hint.textContent = `🛠 Dev mode OTP: ${otpData.otp_dev}`; hint.hidden = false; }
-    otpError.textContent = '';
-    otpBoxes.forEach(b => b.value = '');
-    otpBoxes[0].focus();
-  } catch (err) {
-    otpError.textContent = err.message;
-  }
-});
 
 // ── Logout ───────────────────────────────────────────────────────
 document.getElementById('logout-btn').addEventListener('click', () => {

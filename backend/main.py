@@ -44,8 +44,6 @@ import admin_log
 
 load_dotenv()
 
-OTP_IN_RESPONSE: bool = os.getenv("OTP_IN_RESPONSE", "true").lower() == "true"
-OTP_EXPIRE_SECONDS: int = int(os.getenv("OTP_EXPIRE_SECONDS", "300"))
 
 # -- Rate Limiter --
 
@@ -70,27 +68,6 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
-# -- In-memory OTP store: { email -> (code, expires_at) } --
-
-_otp_store: dict[str, tuple[str, float]] = {}
-
-def _generate_otp(email: str) -> str:
-    code = str(random.randint(100000, 999999))
-    _otp_store[email.lower()] = (code, time.time() + OTP_EXPIRE_SECONDS)
-    return code
-
-def _verify_otp(email: str, code: str) -> bool:
-    entry = _otp_store.get(email.lower())
-    if not entry:
-        return False
-    stored_code, expires_at = entry
-    if time.time() > expires_at:
-        _otp_store.pop(email.lower(), None)
-        return False
-    if stored_code != code.strip():
-        return False
-    _otp_store.pop(email.lower(), None)   # one-time use
-    return True
 
 # -- Auth dependency --
 
@@ -147,15 +124,8 @@ class RegisterRequest(BaseModel):
             raise ValueError("You must accept the terms to register.")
         return v
 
-class OTPRequestBody(BaseModel):
-    email: EmailStr
-
-class OTPVerifyBody(BaseModel):
-    email: EmailStr
-    code: str
-
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email:    EmailStr
     password: str
 
 class CheckRequest(BaseModel):
@@ -225,36 +195,15 @@ def register(request: Request, body: RegisterRequest):
         hashed_password=hashed_pw,
         consent_given=body.consent_given,
     )
-    return {"message": "Account created. Please verify your email with an OTP.", "user_id": user["id"]}
-
-
-@app.post("/api/otp/request")
-@limiter.limit("5/minute")
-def otp_request(request: Request, body: OTPRequestBody):
-    user = db.get_user_by_email(body.email)
-    if not user:
-        # Don't reveal whether the email exists (OWASP A07)
-        return {"message": "If that email is registered, an OTP has been sent."}
-    code = _generate_otp(body.email)
-    # In dev: print to terminal + optionally return in response
-    print(f"\n[OTP] for {body.email}: {code}  (expires in {OTP_EXPIRE_SECONDS}s)\n")
-    response: dict = {"message": "OTP sent. Check your terminal (dev mode)."}
-    if OTP_IN_RESPONSE:
-        response["otp_dev"] = code   # Remove in production
-    return response
-
-
-@app.post("/api/otp/verify")
-@limiter.limit("10/minute")
-def otp_verify(request: Request, body: OTPVerifyBody):
-    user = db.get_user_by_email(body.email)
-    if not user:
-        raise HTTPException(status_code=400, detail="Invalid OTP or email.")
-    if not _verify_otp(body.email, body.code):
-        raise HTTPException(status_code=400, detail="Invalid or expired OTP.")
-    db.mark_otp_verified(user["id"])
     token = auth.create_access_token({"sub": user["id"], "email": user["email"]})
-    return {"access_token": token, "token_type": "bearer"}
+    return {
+        "message": "Account created and logged in.",
+        "user_id": user["id"],
+        "access_token": token,
+        "token_type": "bearer"
+    }
+
+
 
 
 @app.post("/api/login")
@@ -268,7 +217,6 @@ def login(request: Request, body: LoginRequest):
     return {
         "access_token": token,
         "token_type": "bearer",
-        "otp_verified": user.get("otp_verified", False),
     }
 
 

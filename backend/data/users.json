@@ -7,6 +7,22 @@
       "consent_given": true,
       "created_at": "2026-05-06T04:12:13.694754+00:00",
       "otp_verified": true
+    },
+    {
+      "id": "d9205988-264a-4d58-bcdb-1774d058f6ea",
+      "email": "debug_py@example.com",
+      "hashed_password": "$2b$12$SY1JYsxhPr8PgzgHigCVvOMJuFD.tzZ.IqVLmdkzQnSeuoOk32Jee",
+      "consent_given": true,
+      "created_at": "2026-05-06T10:34:06.043059+00:00",
+      "otp_verified": true
+    },
+    {
+      "id": "dc6eb328-4e72-48d8-b6a7-e9ebc69e07da",
+      "email": "abhinav7786@gmail.com",
+      "hashed_password": "$2b$12$DEPPD3V.w7yZ7Z9L.iYYv.NLISZdPXUBTZ8Z8wtebX/eHYaph6wsK",
+      "consent_given": true,
+      "created_at": "2026-05-06T10:46:01.558330+00:00",
+      "otp_verified": true
     }
   ]
 }
