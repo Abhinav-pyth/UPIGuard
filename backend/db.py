@@ -27,9 +27,14 @@ def _read(path: Path) -> dict:
         return json.load(f)
 
 def _write(path: Path, data: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except OSError as e:
+        # On Vercel (read-only filesystem), this will fail.
+        # We log it and continue so the user request doesn't crash.
+        print(f"[DB] Warning: Could not write to {path} (likely read-only FS): {e}")
 
 # ── Users ─────────────────────────────────────────────────────────────────────
 
