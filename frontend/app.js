@@ -1,6 +1,6 @@
 /* ─── UPIGuard Frontend JS v2 ──────────────────────────────────── */
 
-const API_BASE = 'http://127.0.0.1:8001';
+const API_BASE = '';
 
 // ── Token Storage (sessionStorage — cleared on tab close) ────────
 const TokenStore = {
