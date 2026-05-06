@@ -1,0 +1,13 @@
+{
+  "checks": [
+    {
+      "id": "50b4bdd3-6b37-4b0c-8367-124795527bd1",
+      "user_id": "a4ad249e-de5f-4f8c-beab-803d2a775ca7",
+      "upi_hash": "99625774959177c451b097b3ab8189d2eac84a90db701951dc62bd1d82a9d3f5",
+      "upi_masked": "t******r@paytm",
+      "is_compromised": false,
+      "breach_count": 0,
+      "checked_at": "2026-05-06T04:13:38.310236+00:00"
+    }
+  ]
+}

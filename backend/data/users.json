@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "id": "a4ad249e-de5f-4f8c-beab-803d2a775ca7",
+      "email": "smoke@upiguard.dev",
+      "hashed_password": "$2b$12$a.lZFQsjg2cgCvnZbJUVxe0h5C4SlsAr8C7woVbFiqzHa0Yp0gD0W",
+      "consent_given": true,
+      "created_at": "2026-05-06T04:12:13.694754+00:00",
+      "otp_verified": true
+    }
+  ]
+}

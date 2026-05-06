@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UPIGuard — Protect Your Digital Wallet</title>
+  <meta name="description" content="Check if your UPI ID has appeared in any known data breach. Free, private, and instant — take back control of your digital payments security." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-canvas" aria-hidden="true">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+    <canvas id="particle-canvas"></canvas>
+  </div>
+
+  <!-- ── Auth Modal ──────────────────────────────────────────────── -->
+  <div id="auth-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" hidden>
+    <div class="modal-card glass-card" id="auth-modal">
+      <button class="modal-close" id="auth-close-btn" aria-label="Close">✕</button>
+
+      <!-- Tabs -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login">Login</button>
+        <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" aria-controls="panel-register">Register</button>
+      </div>
+
+      <!-- Login Panel -->
+      <div id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+        <h2 id="auth-modal-title" class="modal-title">Welcome back</h2>
+        <form id="login-form" novalidate>
+          <div class="form-field">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" autocomplete="email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••" required />
+          </div>
+          <p id="login-error" class="form-error" role="alert" aria-live="polite"></p>
+          <button type="submit" id="login-btn" class="modal-submit-btn">Login</button>
+        </form>
+        <p class="auth-switch">No account? <button class="link-btn" id="goto-register">Register here</button></p>
+      </div>
+
+      <!-- Register Panel -->
+      <div id="panel-register" role="tabpanel" aria-labelledby="tab-register" hidden>
+        <h2 class="modal-title">Create account</h2>
+        <form id="register-form" novalidate>
+          <div class="form-field">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" autocomplete="email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-field">
+            <label for="reg-password">Password <span class="field-hint">(min 8 chars)</span></label>
+            <input type="password" id="reg-password" autocomplete="new-password" placeholder="••••••••" required minlength="8" />
+          </div>
+          <div class="consent-row">
+            <input type="checkbox" id="consent-checkbox" required />
+            <label for="consent-checkbox">
+              I consent to this service checking my UPI ID against breach datasets for security purposes. I understand my UPI ID is hashed — never stored in plain text.
+            </label>
+          </div>
+          <p id="register-error" class="form-error" role="alert" aria-live="polite"></p>
+          <button type="submit" id="register-btn" class="modal-submit-btn">Create Account</button>
+        </form>
+        <p class="auth-switch">Have an account? <button class="link-btn" id="goto-login">Login here</button></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OTP Modal ───────────────────────────────────────────────── -->
+  <div id="otp-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="otp-modal-title" hidden>
+    <div class="modal-card glass-card otp-card">
+      <div class="otp-icon" aria-hidden="true">🔐</div>
+      <h2 id="otp-modal-title" class="modal-title">Verify Your Email</h2>
+      <p class="otp-desc">A 6-digit code has been sent. Check your server terminal (dev mode) or the API response.</p>
+      <div id="otp-dev-hint" class="otp-dev-hint" hidden></div>
+      <form id="otp-form" novalidate>
+        <div class="otp-inputs" aria-label="Enter 6-digit OTP">
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 1" id="otp-0" />
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 2" id="otp-1" />
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 3" id="otp-2" />
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 4" id="otp-3" />
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 5" id="otp-4" />
+          <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Digit 6" id="otp-5" />
+        </div>
+        <p id="otp-error" class="form-error" role="alert" aria-live="polite"></p>
+        <button type="submit" id="otp-verify-btn" class="modal-submit-btn">Verify</button>
+      </form>
+      <button class="link-btn otp-resend" id="otp-resend-btn">Resend OTP</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L3 7.5V14c0 5.25 4.67 10.17 11 11.5C20.33 24.17 25 19.25 25 14V7.5L14 2Z" stroke="url(#shield-grad)" stroke-width="2" stroke-linejoin="round" fill="none"/>
+            <path d="M9 14l3.5 3.5L19 10" stroke="url(#shield-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="shield-grad" x1="3" y1="2" x2="25" y2="25.5" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#a78bfa"/>
+                <stop offset="1" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">UPI<span class="logo-accent">Guard</span></span>
+      </div>
+      <div class="header-actions">
+        <!-- Unauthenticated state -->
+        <div id="header-guest" class="header-auth-state">
+          <div class="header-badge">
+            <span class="badge-dot"></span>
+            Free &amp; Private
+          </div>
+          <button class="header-login-btn" id="open-auth-btn">Login / Register</button>
+        </div>
+        <!-- Authenticated state -->
+        <div id="header-user" class="header-auth-state" hidden>
+          <button class="header-dashboard-btn" id="show-dashboard-btn">📊 Dashboard</button>
+          <div class="user-pill" id="user-pill">
+            <span class="user-avatar" aria-hidden="true">👤</span>
+            <span id="user-email-display" class="user-email-text"></span>
+            <button class="logout-btn" id="logout-btn" aria-label="Logout">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- Hero / Checker -->
+    <section class="hero" aria-labelledby="hero-heading" id="checker-section">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-icon">🔍</span>
+        Breach Intelligence for India's UPI Ecosystem
+      </div>
+      <h1 id="hero-heading" class="hero-title">
+        Is Your UPI ID<br/>
+        <span class="title-gradient">Exposed?</span>
+      </h1>
+      <p class="hero-subtitle">
+        Instantly check if your UPI ID has appeared in dark web dumps,
+        phishing databases, or public data leaks — and take action before
+        someone exploits it.
+      </p>
+
+      <!-- Auth required notice (shown when logged out) -->
+      <div id="auth-required-notice" class="auth-notice glass-card">
+        <span class="auth-notice-icon">🔒</span>
+        <div>
+          <strong>Login required to check your UPI ID.</strong>
+          <p>Create a free account to run checks, view your history, and receive alerts.</p>
+        </div>
+        <button class="check-btn" id="notice-login-btn">Get Started →</button>
+      </div>
+
+      <!-- Checker Card (shown when logged in) -->
+      <div id="checker-card" class="checker-card glass-card" role="region" aria-label="UPI ID Breach Checker" hidden>
+        <form id="checker-form" class="checker-form" novalidate>
+          <div class="input-group" id="input-group">
+            <div class="input-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <path d="M2 10h20"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              id="upi-input"
+              class="upi-input"
+              placeholder="yourname@paytm or 9876543210@oksbi"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="none"
+              spellcheck="false"
+              aria-label="Enter your UPI ID"
+              aria-required="true"
+              aria-describedby="input-hint input-error"
+            />
+            <button type="submit" id="check-btn" class="check-btn" aria-label="Check UPI ID for breaches">
+              <span class="btn-text">Check Now</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+              <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+          <p id="input-hint" class="input-hint">Format: <code>username@bankhandle</code> · e.g. <code>rahul@oksbi</code></p>
+          <p id="input-error" class="input-error" role="alert" aria-live="polite"></p>
+        </form>
+
+        <div class="privacy-note" aria-label="Privacy assurance">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Your UPI ID is <strong>hashed with HMAC-SHA256</strong> before storage. Plaintext is never saved in your account.
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section" class="results-section" aria-live="polite" aria-label="Breach check results" hidden>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard-section" class="dashboard-section" aria-labelledby="dashboard-heading" hidden>
+      <div class="section-header">
+        <h2 id="dashboard-heading" class="section-title">My Dashboard</h2>
+        <button class="back-to-checker-btn link-btn" id="back-to-checker-btn">← Back to Checker</button>
+      </div>
+      <div id="dashboard-stats" class="dashboard-stats"></div>
+      <div id="dashboard-history" class="dashboard-history"></div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="stats-bar glass-card" aria-label="Database statistics" id="stats-bar">
+      <div class="stat-item">
+        <span class="stat-number" id="stat-records">12+</span>
+        <span class="stat-label">Breach Records</span>
+      </div>
+      <div class="stat-divider" aria-hidden="true"></div>
+      <div class="stat-item">
+        <span class="stat-number">4</span>
+        <span class="stat-label">Severity Levels</span>
+      </div>
+      <div class="stat-divider" aria-hidden="true"></div>
+      <div class="stat-item">
+        <span class="stat-number">∞</span>
+        <span class="stat-label">Free Checks</span>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" aria-labelledby="how-heading">
+      <h2 id="how-heading" class="section-title">How It Works</h2>
+      <div class="steps-grid">
+        <div class="step-card glass-card">
+          <div class="step-number" aria-hidden="true">01</div>
+          <div class="step-icon" aria-hidden="true">✏️</div>
+          <h3 class="step-title">Create Your Account</h3>
+          <p class="step-desc">Register with your email, accept the privacy terms, and verify your identity via OTP.</p>
+        </div>
+        <div class="step-card glass-card">
+          <div class="step-number" aria-hidden="true">02</div>
+          <div class="step-icon" aria-hidden="true">🔎</div>
+          <h3 class="step-title">We Scan Securely</h3>
+          <p class="step-desc">Your UPI ID is matched against breach datasets. Only a cryptographic hash is saved to your account.</p>
+        </div>
+        <div class="step-card glass-card">
+          <div class="step-number" aria-hidden="true">03</div>
+          <div class="step-icon" aria-hidden="true">🛡️</div>
+          <h3 class="step-title">Take Action</h3>
+          <p class="step-desc">If found, we show exactly what was exposed and guide you through securing your account.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Remediation Guide (shown only on breach) -->
+    <section id="remediation-section" class="remediation-section" hidden aria-labelledby="remediation-heading">
+      <div class="glass-card remediation-card">
+        <div class="remediation-header">
+          <span class="remediation-icon" aria-hidden="true">🚨</span>
+          <h2 id="remediation-heading" class="remediation-title">What To Do Right Now</h2>
+        </div>
+        <div class="remediation-steps">
+          <div class="rem-step">
+            <div class="rem-num" aria-label="Step 1">1</div>
+            <div class="rem-content">
+              <h3>Change Your UPI PIN Immediately</h3>
+              <p>Open your UPI app (PhonePe, GPay, Paytm, BHIM) → Go to <strong>Profile → UPI PIN → Change PIN</strong>. Use a unique 6-digit PIN not used elsewhere.</p>
+            </div>
+          </div>
+          <div class="rem-step">
+            <div class="rem-num" aria-label="Step 2">2</div>
+            <div class="rem-content">
+              <h3>Deregister &amp; Re-register Your UPI ID</h3>
+              <p>In your UPI app, navigate to <strong>Manage UPI IDs</strong>, delete the compromised ID, and create a new one with a different handle.</p>
+            </div>
+          </div>
+          <div class="rem-step">
+            <div class="rem-num" aria-label="Step 3">3</div>
+            <div class="rem-content">
+              <h3>Enable Transaction Limits &amp; Alerts</h3>
+              <p>Set a daily transaction limit in your bank's app and enable SMS/email alerts for every transaction.</p>
+            </div>
+          </div>
+          <div class="rem-step">
+            <div class="rem-num" aria-label="Step 4">4</div>
+            <div class="rem-content">
+              <h3>Check Linked Accounts</h3>
+              <p>Review which bank accounts are linked to this UPI ID. Consider using a dedicated low-balance account for UPI.</p>
+            </div>
+          </div>
+          <div class="rem-step">
+            <div class="rem-num" aria-label="Step 5">5</div>
+            <div class="rem-content">
+              <h3>Report to NPCI &amp; Your Bank</h3>
+              <p>File a complaint at <a href="https://www.npci.org.in" target="_blank" rel="noopener noreferrer" class="rem-link">npci.org.in</a> or call <strong>NPCI Helpline: 1800-120-1740</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p class="footer-text">
+      UPIGuard is an independent privacy tool. Not affiliated with NPCI, any bank, or UPI payment platform.
+      Data is sourced from <strong>publicly reported breaches</strong> for educational and protective purposes only.
+    </p>
+    <p class="footer-disclaimer">
+      ⚠️ Not finding your UPI ID does <em>not</em> guarantee it has never been exposed — our database is not exhaustive.
+    </p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

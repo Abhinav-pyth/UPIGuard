@@ -1,0 +1,100 @@
+{
+  "breaches": [
+    {
+      "upi_id": "rahul.sharma@paytm",
+      "breach_date": "2024-03-15",
+      "source": "DarkWeb Forum Dump",
+      "severity": "critical",
+      "records_exposed": ["upi_id", "phone_number", "full_name", "linked_bank"],
+      "description": "A large-scale data dump containing UPI IDs and linked phone numbers was posted on a dark web forum. Likely origin: compromised third-party merchant app."
+    },
+    {
+      "upi_id": "priya.mehta@okicici",
+      "breach_date": "2023-11-02",
+      "source": "Phishing Campaign Database",
+      "severity": "high",
+      "records_exposed": ["upi_id", "email", "transaction_history_partial"],
+      "description": "UPI IDs harvested via a mass phishing campaign targeting e-commerce users. Data found circulating on Telegram hacker groups."
+    },
+    {
+      "upi_id": "amit.kumar@ybl",
+      "breach_date": "2024-01-20",
+      "source": "Leaked Merchant Database",
+      "severity": "medium",
+      "records_exposed": ["upi_id", "merchant_name", "transaction_count"],
+      "description": "A merchant payment aggregator suffered a breach. UPI IDs of frequent customers were exposed alongside aggregated transaction metadata."
+    },
+    {
+      "upi_id": "sunita.rao@oksbi",
+      "breach_date": "2023-07-08",
+      "source": "Credential Stuffing Attack Log",
+      "severity": "high",
+      "records_exposed": ["upi_id", "mpin_hash", "device_fingerprint"],
+      "description": "Credentials obtained via stuffing attacks on a fintech app. MPIN hashes and device IDs were exposed alongside UPI IDs."
+    },
+    {
+      "upi_id": "vikram.nair@apl",
+      "breach_date": "2024-04-01",
+      "source": "Scraped QR Code Repository",
+      "severity": "low",
+      "records_exposed": ["upi_id", "display_name"],
+      "description": "UPI IDs scraped from publicly shared QR codes on social media and e-commerce platforms. Low severity — no financial data linked."
+    },
+    {
+      "upi_id": "kavya.reddy@paytm",
+      "breach_date": "2023-09-14",
+      "source": "DarkWeb Combo List",
+      "severity": "critical",
+      "records_exposed": ["upi_id", "phone_number", "email", "linked_bank", "approximate_balance_range"],
+      "description": "Part of a combo list sold on dark web marketplaces. Includes financial profile data suggesting insider access to a payment platform."
+    },
+    {
+      "upi_id": "rohit.gupta@upi",
+      "breach_date": "2024-02-28",
+      "source": "Telecom Data Breach",
+      "severity": "medium",
+      "records_exposed": ["upi_id", "phone_number", "carrier_name"],
+      "description": "Telecom subscriber data leaked and cross-referenced with registered UPI IDs. Exposure limited to identity metadata."
+    },
+    {
+      "upi_id": "deepa.sinha@okhdfc",
+      "breach_date": "2023-12-05",
+      "source": "Automated Bot Scrape",
+      "severity": "low",
+      "records_exposed": ["upi_id", "associated_name"],
+      "description": "UPI IDs collected through automated scraping of payment request links shared in public WhatsApp groups and forums."
+    },
+    {
+      "upi_id": "arjun.patel@okaxis",
+      "breach_date": "2024-05-10",
+      "source": "Supply Chain Compromise",
+      "severity": "critical",
+      "records_exposed": ["upi_id", "phone_number", "full_name", "aadhaar_last4", "linked_bank"],
+      "description": "A downstream vendor of a major payments processor was compromised. Highly sensitive PII including partial Aadhaar numbers were exposed."
+    },
+    {
+      "upi_id": "neha.joshi@ibl",
+      "breach_date": "2023-08-22",
+      "source": "Healthcare App Breach",
+      "severity": "high",
+      "records_exposed": ["upi_id", "phone_number", "health_plan_id"],
+      "description": "A health-tech startup's payment module was breached. UPI IDs linked to insurance premium payments were exposed."
+    },
+    {
+      "upi_id": "test@upi",
+      "breach_date": "2024-01-01",
+      "source": "Demo Breach Dataset",
+      "severity": "medium",
+      "records_exposed": ["upi_id", "phone_number"],
+      "description": "This is a test entry for demonstration purposes."
+    },
+    {
+      "upi_id": "demo@paytm",
+      "breach_date": "2023-06-15",
+      "source": "Demo Phishing Campaign",
+      "severity": "high",
+      "records_exposed": ["upi_id", "email", "full_name"],
+      "description": "Demonstration entry — simulates a high-severity phishing breach."
+    }
+  ]
+}
